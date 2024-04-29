@@ -25,7 +25,7 @@ energy_sector = [
      ]},
     {"sector": "EnergyServices",
      "companies": [
-         {"name": "Siemens Gamesa Renewable Energy", "country": "Spain", "symbol": "SGRE.MC", "data": []},
+         {"name": "Técnicas Reunidas", "country": "Spain", "symbol": "TRE.MC", "data": []},
          {"name": "Honeywell International Inc.", "country": "USA", "symbol": "HON", "data": []}
      ]},
     {"sector": "Infrastructure",
@@ -35,106 +35,71 @@ energy_sector = [
      ]}
 ]
 
+now_date = datetime.now()
+
+start_date = datetime(2000, 1, 1)
+
+get_events_url = "https://ucdpapi.pcr.uu.se/api/gedevents/23.1"
+armed_conflict_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"
+end_date = datetime(now_date.year, now_date.month, now_date.day)
+parameters = {
+    "pagesize": 10000,
+    "format": "json",
+    "StartDate": start_date.strftime('%Y-%m-%d'),
+    "EndDate": end_date.strftime('%Y-%m-%d')
+}
+
 
 def main():
-    now_date = datetime.now()
+    #get events
+    get_data_ucdp([], start_date, get_events_url, 'ucdp_data_events_2000_2024.csv')
+    #get conflict
+    get_data_ucdp([], start_date, armed_conflict_url, 'ucdp_data_conflicts_2000_2024.csv')
 
-    events_url = "https://ucdpapi.pcr.uu.se/api/gedevents/23.1"
+    get_market_actions_history_values()
 
-    start_date = datetime(2001, 1, 1)
-    end_date = datetime(now_date.year, now_date.month, now_date.day)
 
-    all_data = []
-
-    current_date = start_date
-    parameters = {
-        "pagesize": 1000,
-        "format": "json",
-        "date_start": start_date.strftime('%Y-%m-%d'),
-        "date_end": end_date.strftime('%Y-%m-%d')
-    }
-
-    response = requests.get(events_url, params=parameters)
-    data = json.loads(response.text)
-    page = 1
-    total_pages = data['TotalPages']
-
-    print(total_pages)
-    print(page)
-    next_page = data['NextPageUrl']
-    if response.status_code == 200:
-        all_data.extend(data['Result'])
-
-    while page <= total_pages:
-        response = requests.get(next_page)
-        data = json.loads(response.text)
-        next_page = data['NextPageUrl']
-        if response.status_code == 200:
-
-            all_data.extend(data['Result'])
-            df = pd.DataFrame(all_data)
-
-        else:
-            print(f"Error al obtener los datos del UCDP para la fecha {current_date}.")
-        print(total_pages)
-        print(page)
-        page = page + 1
-
-    # Guardar los datos en un archivo CSV
-    df.to_csv('ucdp_data_events_2000_2024.csv', index=False)
-    events_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"
-
-    start_date = datetime(2001, 1, 1)
-    end_date = datetime(now_date.year, now_date.month, now_date.day)
-
-    all_data = []
-
-    current_date = start_date
-    parameters = {
-        "pagesize": 10000,
-        "format": "json",
-        "date_start": start_date.strftime('%Y-%m-%d'),
-        "date_end": end_date.strftime('%Y-%m-%d')
-    }
-
-    response = requests.get(events_url, params=parameters)
-    data = json.loads(response.text)
-    page = 1
-    total_pages = data['TotalPages']
-
-    print(total_pages)
-    print(page)
-    next_page = data['NextPageUrl']
-    if response.status_code == 200:
-        all_data.extend(data['Result'])
-
-    while page < total_pages:
-        response = requests.get(next_page)
-        data = json.loads(response.text)
-        next_page = data['NextPageUrl']
-        if response.status_code == 200:
-
-            all_data.extend(data['Result'])
-            df = pd.DataFrame(all_data)
-
-            # Guardar los datos en un archivo CSV
-        else:
-            print(f"Error al obtener los datos del UCDP para la fecha {current_date}.")
-        print(total_pages)
-        page = page + 1
-        print(page)
-
-    df.to_csv('ucdp_data_conflicts_2000_2024.csv', index=False)
-
+def get_market_actions_history_values():
     if not os.path.exists('docs'):
         os.makedirs('docs')
-
     for sector in energy_sector:
         for company in sector['companies']:
             company_data = yf.download(company['symbol'], start='2000-01-01', end=now_date)
             file_name = f"{company['name']}_data.csv"
             company_data.to_csv(os.path.join('docs', file_name))
             company['data'] = company_data
+
+
+def get_data_ucdp(all_data, current_date, url, csv_name, page=1):
+    response = requests.get(url, params=parameters)
+    data = json.loads(response.text)
+    total_pages = data['TotalPages']
+    print(f"total_pages: {total_pages} ")
+    print(f"actual page: {page} ")
+    next_page = data['NextPageUrl']
+    if response.status_code == 200:
+        all_data.extend(data['Result'])
+    df = pd.DataFrame(all_data)
+    while page < total_pages:
+        try:
+            if next_page != "":
+                response = requests.get(next_page)
+                data = json.loads(response.text)
+                next_page = data['NextPageUrl']
+                if response.status_code == 200:
+                    all_data.extend(data['Result'])
+                    df = pd.DataFrame(all_data)
+                else:
+                    print(f"Error al obtener los datos del UCDP para la fecha {current_date}.")
+
+                page = page + 1
+                print(f"actual page: {page} ")
+            else:
+                break
+
+        except:
+            print("Error")
+    df.to_csv(csv_name, index=False)
 
 
 if __name__ == "__main__":
