@@ -1,6 +1,7 @@
 # Análisis de Conflictos y Acciones Energéticas en el Medio Oriente
 
-Este proyecto realiza un análisis de conflictos y acciones energéticas en el Medio Oriente utilizando datos de la UCDP (Uppsala Conflict Data Program) y datos históricos de precios de acciones de empresas energéticas.
+Este proyecto realiza un análisis de conflictos y acciones energéticas en el Medio Oriente utilizando datos de la UCDP (Uppsala Conflict Data Program)
+y datos históricos de precios de acciones de empresas energéticas.
 
 ## Archivos Utilizados y Generados
 
@@ -50,14 +51,7 @@ git clone https://github.com/sirtxo/Finance_Eda.git
 
 2. Asegúrate de tener instalado Python en tu sistema. Puedes descargarlo desde [python.org](https://www.python.org/).
 
-3. Instala las bibliotecas necesarias ejecutando el siguiente comando en tu terminal:
-
-pip install pandas matplotlib
-
-
-4. Ejecuta el script de Python `script_analisis.py` en tu entorno de Python para llevar a cabo el análisis de datos.
-
-5. Explora los resultados del análisis y las visualizaciones generadas para obtener información sobre los conflictos armados entre 2000 y 2024.
+3. Instala las bibliotecas necesarias ejecutando el siguiente comando en tu terminal.
 
 ## Contribuciones
 

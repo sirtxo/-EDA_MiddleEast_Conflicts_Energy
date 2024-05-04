@@ -1,8 +1,12 @@
-import matplotlib.pyplot as plt  # Importing matplotlib for plotting
 import mpld3  # Importing mpld3 for converting matplotlib plots to HTML
 import pandas as pd  # Importing pandas for data manipulation
 from folium import folium, plugins  # Importing folium for creating interactive maps
 import warnings  # Importing warnings module to suppress warnings
+import warnings  # Importing warnings module to suppress warnings
+
+import mpld3  # Importing mpld3 for converting matplotlib plots to HTML
+import pandas as pd  # Importing pandas for data manipulation
+from folium import folium, plugins  # Importing folium for creating interactive maps
 
 # Suppressing warnings to avoid cluttering the output
 warnings.filterwarnings("ignore")
@@ -53,25 +57,36 @@ def create_heatmap_full(data_filtered):
     return map_heatmap_time
 
 # Function to plot stock data
+
+import matplotlib.pyplot as plt
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 def plot_all_data(name, data):
     # Calculate PriceChange (difference of closing price between consecutive days)
     data['PriceChange'] = data['Close'] - data['Open']
 
+    # Set Seaborn style
+    plt.style.use('seaborn-dark')
+
     # Create subplots
     figi, (ax1, ax2) = plt.subplots(2, 1, figsize=(13.5, 9), sharex=True)
 
+    # Set background color of the figure to black
+    figi.patch.set_facecolor('black')
+
     # Line plot for Close Value
-    color = 'blue'
+    color = 'lightblue'
     ax1.set_ylabel('Close Value ($)', color=color)
     ax1.plot(data.index, data['Close'], color=color, label=' Close Value ')
     ax1.tick_params(axis='y', labelcolor=color)
-    ax1.legend(loc='upper left')
+    ax1.legend(loc='upper left', facecolor='black', edgecolor='white', fontsize='small', framealpha=0.8)
 
     # Bar plot for PriceChange
-    color = 'red'
-    ax2.set_ylabel('Lost Win (Shares)', color=color)
+    ax2.set_ylabel('Lost Win (Shares)', color='lightblue')
     bars = ax2.bar(data.index, data['PriceChange'], color=data['PriceChange'].apply(lambda x: 'red' if x < 0 else 'green'))
-    ax2.tick_params(axis='y', labelcolor=color)
     ax2.set_xlabel('Date')
 
     # Add date labels for negative PriceChange bars
@@ -83,7 +98,21 @@ def plot_all_data(name, data):
             bar.set_label(date)
 
     # Add title
-    plt.title(f'{name} Close Value and Lost-Win')
+    plt.suptitle(f'{name} Close Value and Lost-Win', fontsize=16, color='lightblue')
+
+    # Set background color of the subplots to black
+    ax1.set_facecolor('black')
+    ax2.set_facecolor('black')
+
+    # Set color of ticks and labels to white
+    ax1.tick_params(colors='white')
+    ax2.tick_params(colors='white')
+
+    # Set color of spine edges to white
+    for spine in ax1.spines.values():
+        spine.set_edgecolor('white')
+    for spine in ax2.spines.values():
+        spine.set_edgecolor('white')
 
     # Adjust layout
     plt.tight_layout()
@@ -92,11 +121,14 @@ def plot_all_data(name, data):
     plt.show()
 
     # Convert plot to HTML
-    html_output = mpld3.fig_to_html(plt.gcf())
+    html_output = mpld3.fig_to_html(figi)
 
     # Save HTML output to file
     with open(f'html/04_plot_all_data_{name}.html', 'w') as file:
         file.write(html_output)
+
+
+
 
 # Function to create heatmap for a specific year
 def create_heatmap(year, datos):
@@ -202,3 +234,26 @@ def filtrar_intervalos_end(intervalos_fechas, data_full, data, umbral):
             intervalos_filtrados.append((fecha_inicio, fecha_fin, data_filtered, stock_data, correlation))
 
     return intervalos_filtrados
+
+
+def fill_nan_data(data_original, date_start, date_end, date_name ='Date', value_name ='Volume'):
+    # Ordenar los datos por fecha
+    data_original.sort_values(by=date_name, inplace=True)
+
+    # Crear un rango de fechas
+    rango_fechas = pd.date_range(start=date_start, end=date_end)
+
+    # Crear un DataFrame con todas las fechas del rango y valores nulos
+    fechas_faltantes_df = pd.DataFrame({date_name: rango_fechas})
+
+    # Fusionar el DataFrame original con el DataFrame de fechas faltantes
+    data_completa = pd.merge(fechas_faltantes_df, data_original, on=date_name, how='left')
+
+    # Iterar sobre los índices faltantes y rellenar los valores
+    for idx, row in data_completa.iterrows():
+        if pd.isnull(row[value_name]):
+            idx_siguiente = data_completa.iloc[idx:].index.min()
+            if pd.notnull(idx_siguiente):
+                data_completa.at[idx, value_name] = data_completa.at[idx_siguiente, value_name]
+
+    return data_completa
