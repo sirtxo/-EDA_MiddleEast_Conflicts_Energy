@@ -6,12 +6,14 @@ import requests  # Importing requests for making HTTP requests
 from datetime import datetime  # Importing datetime module for working with dates and times
 import os  # Importing os module for interacting with the operating system
 
-# List of dictionaries representing energy sectors and their associated companies
 energy_sector = [
     {"sector": "Oil&Gas",
      "companies": [
          {"name": "Repsol", "country": "Spain", "symbol": "REP.MC", "data": []},
-         {"name": "Exxon Mobil Corporation", "country": "USA", "symbol": "XOM", "data": []}
+         {"name": "Exxon Mobil Corporation", "country": "USA", "symbol": "XOM", "data": []},
+         {"name": "Saudi Arabian Oil Company (Aramco)", "country": "Saudi Arabia", "symbol": "2222.SR", "data": []},
+         {"name": "Gazprom", "country": "Russia", "symbol": "GAZP.ME", "data": []},
+         {"name": "BP plc", "country": "UK", "symbol": "BP", "data": []}
      ]},
     {"sector": "ElectricPower",
      "companies": [
@@ -27,7 +29,8 @@ energy_sector = [
     {"sector": "EnergyServices",
      "companies": [
          {"name": "Técnicas Reunidas", "country": "Spain", "symbol": "TRE.MC", "data": []},
-         {"name": "Honeywell International Inc.", "country": "USA", "symbol": "HON", "data": []}
+         {"name": "Honeywell International Inc.", "country": "USA", "symbol": "HON", "data": []},
+         {"name": "Schlumberger Limited", "country": "USA", "symbol": "SLB", "data": []}
      ]},
     {"sector": "Infrastructure",
      "companies": [
@@ -35,6 +38,7 @@ energy_sector = [
          {"name": "Kinder Morgan, Inc.", "country": "USA", "symbol": "KMI", "data": []}
      ]}
 ]
+
 
 now_date = datetime.now()  # Get current date and time
 start_date = datetime(2000, 1, 1)  # Start date for fetching data
@@ -52,9 +56,9 @@ parameters = {
 
 def main():
     # Get events data
-    get_data_ucdp([], start_date, get_events_url, 'docs/ucdp_data_events_2000_2024.csv')
+    #  get_data_ucdp([], start_date, get_events_url, 'docs/ucdp_data_events_2000_2024.csv')
     # Get conflict data
-    get_data_ucdp([], start_date, armed_conflict_url, 'docs/ucdp_data_conflicts_2000_2024.csv')
+    #  get_data_ucdp([], start_date, armed_conflict_url, 'docs/ucdp_data_conflicts_2000_2024.csv')
 
     # Get market actions history values for energy companies
     get_market_actions_history_values()
