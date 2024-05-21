@@ -39,29 +39,31 @@ energy_sector = [
      ]}
 ]
 
-
 now_date = datetime.now()  # Get current date and time
 start_date = datetime(2000, 1, 1)  # Start date for fetching data
 
 get_events_url = "https://ucdpapi.pcr.uu.se/api/gedevents/23.1"  # URL for fetching events data
-armed_conflict_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"  # URL for fetching conflict data
+armed_conflict_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"
+# URL for fetching conflict data
 end_date = datetime(now_date.year, now_date.month, now_date.day)  # End date for fetching data
 
-parameters = {
+paramteers = {
     "pagesize": 10000,
     "format": "json",
     "StartDate": start_date.strftime('%Y-%m-%d'),
     "EndDate": end_date.strftime('%Y-%m-%d')
 }
 
+
 def main():
     # Get events data
-    #  get_data_ucdp([], start_date, get_events_url, 'docs/ucdp_data_events_2000_2024.csv')
+    get_data_ucdp([], start_date, get_events_url, '../data/ucdp_data_events_2000_2024.csv')
     # Get conflict data
-    #  get_data_ucdp([], start_date, armed_conflict_url, 'docs/ucdp_data_conflicts_2000_2024.csv')
+    get_data_ucdp([], start_date, armed_conflict_url, '../data/ucdp_data_conflicts_2000_2024.csv')
 
     # Get market actions history values for energy companies
     get_market_actions_history_values()
+
 
 def get_market_actions_history_values():
     if not os.path.exists('../docs'):
@@ -74,6 +76,7 @@ def get_market_actions_history_values():
             # Save market data to CSV file
             company_data.to_csv(os.path.join('../docs', file_name))
             company['data'] = company_data
+
 
 def get_data_ucdp(all_data, current_date, url, csv_name, page=1):
     response = requests.get(url, params=parameters)
@@ -106,6 +109,7 @@ def get_data_ucdp(all_data, current_date, url, csv_name, page=1):
             print("Error")
     # Save UCDP data to CSV file
     df.to_csv(csv_name, index=False)
+
 
 if __name__ == "__main__":
     main()
