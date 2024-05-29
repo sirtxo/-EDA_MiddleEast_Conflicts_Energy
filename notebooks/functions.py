@@ -1,7 +1,3 @@
-import mpld3  # Importing mpld3 for converting matplotlib plots to HTML
-import pandas as pd  # Importing pandas for data manipulation
-from folium import folium, plugins  # Importing folium for creating interactive maps
-import warnings  # Importing warnings module to suppress warnings
 import warnings  # Importing warnings module to suppress warnings
 
 import mpld3  # Importing mpld3 for converting matplotlib plots to HTML
@@ -207,6 +203,64 @@ def filtrar_intervalos(intervalos_fechas, data_full, data, umbral):
             intervalos_filtrados.append((fecha_inicio, fecha_fin, data_filtered, stock_data, correlation))
 
     return intervalos_filtrados
+
+# Función para calcular los indicadores técnicos y guardar el archivo modificado
+def process_stock_data(file_name):
+    # Importar el archivo CSV como DataFrame y parsear las fechas
+    df = pd.read_csv('../docs/' + file_name, parse_dates=['Date'])
+
+    # Calcular los cambios diarios en el precio de cierre
+    df['Daily Return'] = df['Close'].pct_change()
+
+    # Definir el período de tiempo para el cálculo del RSI
+    period = 14
+
+    # Calcular los cambios positivos y negativos
+    df['Positive Change'] = df['Daily Return'].apply(lambda x: x if x > 0 else 0)
+    df['Negative Change'] = df['Daily Return'].apply(lambda x: -x if x < 0 else 0)
+
+    # Calcular el promedio de los cambios positivos y negativos
+    df['Avg Gain'] = df['Positive Change'].rolling(window=period).mean()
+    df['Avg Loss'] = df['Negative Change'].rolling(window=period).mean()
+
+    # Calcular el RSI
+    df['RS'] = df['Avg Gain'] / df['Avg Loss']
+    df['RSI'] = 100 - (100 / (1 + df['RS']))
+
+    # Eliminar columnas auxiliares utilizadas en el cálculo del RSI
+    df.drop(['Daily Return', 'Positive Change', 'Negative Change', 'Avg Gain', 'Avg Loss', 'RS'], axis=1, inplace=True)
+
+    # Calcular la media móvil simple (SMA) para diferentes períodos
+    for period in [10, 20, 50, 100, 200]:
+        df[f'SMA_{period}'] = df['Close'].rolling(window=period).mean()
+
+    # Calcular la media móvil exponencial (EMA) para diferentes períodos
+    for period in [10, 20, 50, 100, 200]:
+        df[f'EMA_{period}'] = df['Close'].ewm(span=period, adjust=False).mean()
+
+    # Calcular el MACD (Moving Average Convergence Divergence)
+    df['EMA_12'] = df['Close'].ewm(span=12, adjust=False).mean()
+    df['EMA_26'] = df['Close'].ewm(span=26, adjust=False).mean()
+    df['MACD'] = df['EMA_12'] - df['EMA_26']
+    df['Signal Line'] = df['MACD'].ewm(span=9, adjust=False).mean()
+
+    # Calcular las bandas de Bollinger
+    df['MA20'] = df['Close'].rolling(window=20).mean()
+    df['20dSTD'] = df['Close'].rolling(window=20).std()
+    df['Upper Band'] = df['MA20'] + (df['20dSTD'] * 2)
+    df['Lower Band'] = df['MA20'] - (df['20dSTD'] * 2)
+
+    # Calcular el estocástico
+    high14 = df['High'].rolling(window=14).max()
+    low14 = df['Low'].rolling(window=14).min()
+    df['%K'] = ((df['Close'] - low14) / (high14 - low14)) * 100
+    df['%D'] = df['%K'].rolling(window=3).mean()
+
+    # Eliminar filas con valores NaN (debido a los cálculos)
+    df.dropna(inplace=True)
+
+    # Guardar el DataFrame resultante en el mismo archivo CSV
+    df.to_csv('../docs/' + file_name, index=False)
 
 def filtrar_intervalos_end(intervalos_fechas, data_full, data, umbral):
     intervalos_filtrados = []
