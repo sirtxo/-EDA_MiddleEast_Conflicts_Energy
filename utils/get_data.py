@@ -1,3 +1,8 @@
+"""
+This script fetches and processes stock market data for energy sector companies,
+as well as armed conflict data from the UCDP API. The data is saved in CSV format for further analysis.
+"""
+
 import json  # Importing JSON module for working with JSON data
 import yfinance as yf  # Importing yfinance for fetching stock market data
 import plotly.graph_objects as go  # Importing Plotly for interactive plotting
@@ -6,6 +11,7 @@ import requests  # Importing requests for making HTTP requests
 from datetime import datetime  # Importing datetime module for working with dates and times
 import os  # Importing os module for interacting with the operating system
 
+# Define the energy sector companies and their details
 energy_sector = [
     {"sector": "Oil&Gas",
      "companies": [
@@ -39,23 +45,30 @@ energy_sector = [
      ]}
 ]
 
-now_date = datetime.now()  # Get current date and time
-start_date = datetime(2000, 1, 1)  # Start date for fetching data
-
-get_events_url = "https://ucdpapi.pcr.uu.se/api/gedevents/23.1"  # URL for fetching events data
-armed_conflict_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"
+# Get current date and time
+now_date = datetime.now()
+# Start date for fetching data
+start_date = datetime(2000, 1, 1)
+# URL for fetching events data
+get_events_url = "https://ucdpapi.pcr.uu.se/api/gedevents/23.1"
 # URL for fetching conflict data
-end_date = datetime(now_date.year, now_date.month, now_date.day)  # End date for fetching data
+armed_conflict_url = "https://ucdpapi.pcr.uu.se/api/ucdpprioconflict/23.1"
+# End date for fetching data
+end_date = datetime(now_date.year, now_date.month, now_date.day)
 
-paramteers = {
+# Parameters for API requests
+parameters = {
     "pagesize": 10000,
     "format": "json",
     "StartDate": start_date.strftime('%Y-%m-%d'),
     "EndDate": end_date.strftime('%Y-%m-%d')
 }
 
-
 def main():
+    """
+    Main function to fetch UCDP events and conflict data,
+    and to get market actions history values for energy companies.
+    """
     # Get events data
     get_data_ucdp([], start_date, get_events_url, '../data/ucdp_data_events_2000_2024.csv')
     # Get conflict data
@@ -64,8 +77,11 @@ def main():
     # Get market actions history values for energy companies
     get_market_actions_history_values()
 
-
 def get_market_actions_history_values():
+    """
+    Fetches historical market data for each company in the energy sector
+    and saves the data to CSV files in the 'docs' directory.
+    """
     if not os.path.exists('../docs'):
         os.makedirs('../docs')
     for sector in energy_sector:
@@ -77,8 +93,17 @@ def get_market_actions_history_values():
             company_data.to_csv(os.path.join('../docs', file_name))
             company['data'] = company_data
 
-
 def get_data_ucdp(all_data, current_date, url, csv_name, page=1):
+    """
+    Fetches data from the UCDP API and saves it to a CSV file.
+
+    Args:
+    - all_data (list): List to store the data fetched from the API.
+    - current_date (datetime): The start date for fetching data.
+    - url (str): The API endpoint URL.
+    - csv_name (str): The name of the CSV file to save the data.
+    - page (int): The page number for pagination.
+    """
     response = requests.get(url, params=parameters)
     data = json.loads(response.text)
     total_pages = data['TotalPages']
@@ -109,7 +134,6 @@ def get_data_ucdp(all_data, current_date, url, csv_name, page=1):
             print("Error")
     # Save UCDP data to CSV file
     df.to_csv(csv_name, index=False)
-
 
 if __name__ == "__main__":
     main()

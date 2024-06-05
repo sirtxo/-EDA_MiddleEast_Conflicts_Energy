@@ -5,24 +5,20 @@ y datos históricos de precios de acciones de empresas energéticas.
 
 ## Archivos Utilizados y Generados
 
-1. **Data_Initial_Analisis.ipynb**:
-   - Cuaderno Jupyter utilizado para explorar inicialmente los datos de la UCDP y establecer países del Medio Oriente como foco de análisis.
+- **utils/**: Contiene scripts y funciones utilizados en el proyecto.
+  - `get_data.py`: Script para obtener y procesar datos, generando los archivos CSV en `docs/`.
+  - `functions.py`: Funciones utilitarias utilizadas en todo el proyecto.
+  - `stocks_view.py`: Aplicación web para visualizar los datos CSV en un formato web.
 
-2. **Data_Analisis.ipynb**:
-   - Cuaderno Jupyter que realiza un análisis más profundo de los datos de la UCDP, centrándose en países del Medio Oriente, y correlaciona eventos de conflicto con cambios en precios de acciones.
+- **notebooks/**: Contiene cuadernos Jupyter utilizados para el análisis.
+  - **secondary/**: Contiene análisis iniciales por separado.
+    - `Data_conflicts_analysis.ipynb`: Análisis de datos de conflictos.
+    - `Data_index_analysis.ipynb`: Análisis de varios índices económicos.
+    - `Ipc_Oil_Disasters_Initial_Analysis.ipynb`: Análisis inicial de datos del IPC, precios del petróleo y desastres.
+  - `Conflicts_Analysis.ipynb`: Análisis completo de datos de conflictos incluyendo modelos de aprendizaje automático.
+  - `StockAnalysis.ipynb`: Análisis de datos de acciones incluyendo predicciones de aprendizaje automático para `data.csv`.
 
-3. **get_data.py**:
-   - Script Python utilizado para obtener los datos necesarios para el Análisis Exploratorio de Datos (EDA).
-   - Este script descarga y guarda en archivos CSV los datos de eventos de la UCDP y datos históricos de precios de acciones de empresas energéticas.
 
-## Librerías Utilizadas
-
-- pandas: Para manipulación y análisis de datos.
-- matplotlib: Para visualización de datos.
-- numpy: Para cálculos numéricos.
-- requests: Para realizar solicitudes HTTP y obtener datos de la UCDP API.
-- yfinance: Para obtener datos históricos de precios de acciones.
-- plotly: Para visualización interactiva de datos.
 
 ## Otros Detalles
 
